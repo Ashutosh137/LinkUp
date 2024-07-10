@@ -1,0 +1,16 @@
+{
+  "name": "googlemeet",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "server-dev": "cd server && yarn dev ",
+    "server": "yarn --cwd server start",
+    "client-dev": "yarn --cwd app dev",
+    "start": "concurrently \"yarn server\" \"yarn client-dev\"",
+    "dev": "concurrently \"yarn server-dev\" \"yarn client-dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
