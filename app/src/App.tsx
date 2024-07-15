@@ -4,7 +4,7 @@ import Video from "./components/videocall";
 import socket from "./socket";
 import Navbar from "./layout/navbar";
 import TextField from '@mui/material/TextField'
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Container, Stack, Typography, CardMedia } from "@mui/material";
 
 
 export default function App() {
@@ -51,36 +51,50 @@ export default function App() {
 
 
   return (
-    <Box >
+    <Container sx={{ py: 10, mx: "auto" }} maxWidth={"xl"} >
+
+
+
       <Navbar />
-      {load && <div>loading</div>}
-      <Typography my={10} variant="h4">google meet</Typography>
+      {load &&
+        <Box display={"flex"} justifyContent={"center"} alignItems={"center"} position={"absolute"} sx={{
+          inset: 0, width: "100%",
+          zIndex: 5, backdropFilter: 'blur(10px)'
+        }}>
+          <CircularProgress />
+        </Box>}
 
       {roomJoinReq && <Typography>req to join {roomjoinreqdata.UserName} <Button variant="contained" onClick={() => {
         socket.emit("Join-req-accepted", roomjoinreqdata)
         setroomJoinReq(false)
       }}>accept</Button> </Typography>}
 
-      {IsInRoom === "" ?
-        <Stack direction={"row"} gap={2} alignItems={"center"} component={"form"} onSubmit={(e) => {
-          e.preventDefault()
-          socket.emit("req-join", { RoomName, UserName })
-        }} >
-          <TextField type="text" required label="username" value={UserName} onChange={(e) => { setUserName(e.target.value) }} />
-          <TextField type="text" required label="room" value={RoomName} onChange={(e) => { setRoomName(e.target.value) }} />
+      {IsInRoom === "" ? <Stack my={10} direction="row" alignItems={"center"} spacing={2} >
+        <Box sx={{ width: "100%" }}>
+          <Typography variant="h4" py={2} sx={{ textAlign: "center" }}>Videocalls and meetings for everyone
+            <Typography variant="h6" sx={{ textAlign: "center" }}>Join a room or
+              create a new room</Typography>
+          </Typography>
+          <Stack py={6} flexWrap={"wrap"} mx={"auto"} direction={"row"} gap={2} alignItems={"center"} justifyContent={"center"} component={"form"} onSubmit={(e) => {
+            e.preventDefault()
+            socket.emit("req-join", { RoomName, UserName })
+          }} >
+            <Button fullWidth sx={{ maxWidth: 200 }} variant="contained" type="button" onClick={() => {
+              socket.emit("create-room", { RoomName: "ashutosh" })
+            }}>New Meeting</Button>
+            <TextField type="text" required label="username" value={UserName} onChange={(e) => { setUserName(e.target.value) }} />
+            <TextField type="text" required label="room" value={RoomName} onChange={(e) => { setRoomName(e.target.value) }} />
+            <Button disabled={RoomName.length <= 7} type="submit" variant="contained">join room</Button>
+          </Stack>
+        </Box>
 
-          <Button type="submit" variant="contained">join room</Button>
-          <Button variant="contained" type="button" onClick={() => {
-            socket.emit("create-room", { RoomName: "ashutosh" })
-          }}>create room</Button>
-        </Stack>
-
-        :
+        <Box sx={{ width: "100%" }}>
+          <CardMedia component={"img"} sx={{ width: 400, margin: "auto", borderRadius: 10 }} image="https://hbr.org/resources/images/article_assets/2022/09/R2206L_LEES.jpg" />
+        </Box>
+      </Stack> :
         <Video room={IsInRoom} />
       }
-
-
-    </Box>
+    </Container>
 
   )
 }

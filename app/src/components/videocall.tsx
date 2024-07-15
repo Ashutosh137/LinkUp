@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import socket from "../socket";
 import toast from "react-hot-toast";
 import CardMedia from '@mui/material/CardMedia'
@@ -11,7 +11,6 @@ export default function Video({ room }: { room: string }) {
     const [messages, setmessages] = useState<string[]>([]);
     const [message, setmessage] = useState("");
 
-    const [iscalling, setiscalling] = useState<RTCSessionDescriptionInit | null>()
 
     useEffect(() => {
         const initWebRTC = async () => {
@@ -23,13 +22,11 @@ export default function Video({ room }: { room: string }) {
                 } else {
                     console.error('localref is not set');
                 }
-                if (peerConnectionRef.current) {
-                    peerConnectionRef.current! = new RTCPeerConnection({
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' }
-                        ]
-                    });
-                }
+                peerConnectionRef.current = new RTCPeerConnection({
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' }
+                    ]
+                });
 
                 stream.getTracks().forEach(track => {
                     peerConnectionRef.current!.addTrack(track, stream);
@@ -62,6 +59,7 @@ export default function Video({ room }: { room: string }) {
         };
 
         initWebRTC();
+        startCall();
 
         return () => {
             socket.off('offer', handleOffer);
@@ -76,7 +74,10 @@ export default function Video({ room }: { room: string }) {
     }
     const handleOffer = async (offer: RTCSessionDescriptionInit) => {
         if (!peerConnectionRef.current) return;
-        setiscalling(offer)
+        await peerConnectionRef.current!.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnectionRef.current!.createAnswer();
+        await peerConnectionRef.current!.setLocalDescription(answer);
+        socket.emit('answer', { answer, room });
     };
     const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
         if (!peerConnectionRef.current) return;
@@ -97,32 +98,28 @@ export default function Video({ room }: { room: string }) {
         await peerConnectionRef.current!.setLocalDescription(offer);
         socket.emit('offer', { offer, room });
     };
-
     return (
-        <Stack>
-            <Typography variant="h6" color="initial">Room - {room}</Typography>
-            {iscalling && <Box>caling
-                <Button onClick={async () => {
-                    await peerConnectionRef.current!.setRemoteDescription(new RTCSessionDescription(iscalling));
-                    const answer = await peerConnectionRef.current!.createAnswer();
-                    await peerConnectionRef.current!.setLocalDescription(answer);
-                    setiscalling(null)
-                    socket.emit('answer', { answer, room });
-                }}>accept</Button></Box>}
+        <Fragment>
+            <Typography variant="h6" my={2} alignItems={"center"} color="initial">Room - {room}</Typography>
             <Box>
                 <Button variant="contained" onClick={startCall}>Start Call</Button>
                 {messages.map((message, index) => (
                     <Typography key={index}>{message}</Typography>
                 ))}
 
-                <CardMedia component={"video"} ref={localref} autoPlay playsInline muted />
-                <CardMedia component={"video"} ref={remoteVideoRef} autoPlay playsInline />
-                <Stack alignItems={"center"} gap={2} direction={"row"}>
+                <Stack height={"80%"} my={5} direction={"row"} gap={5}>
+                    <CardMedia sx={{ width: "100%", margin: "auto", borderRadius: 10 }} component={"video"} ref={localref} autoPlay playsInline muted />
+                    <CardMedia sx={{ width: "100%", margin: "auto", borderRadius: 10 }} component={"video"} ref={remoteVideoRef} autoPlay playsInline />
+                </Stack>
+                <Stack component={"form"} alignItems={"center"} gap={2} direction={"row"} onSubmit={(e) => {
+                    e.preventDefault()
+                    socket.emit("new-message", { room, message });
+                    setmessage("")
+                }}>
                     <TextField fullWidth label="message" value={message} onChange={(e) => setmessage(e.target.value)} type="text" />
-                    <Button variant="contained" onClick={() => { socket.emit("new-message", { room, message }); setmessage("") }}>Send</Button>
+                    <Button type="submit" variant="contained">Message</Button>
                 </Stack>
             </Box>
-
-        </Stack>
+        </Fragment>
     )
 }
