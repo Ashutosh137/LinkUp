@@ -9,13 +9,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "https://linkup-dev.vercel.app/",
+    origin: "*",
   },
 });
 const cors = require("cors");
 
 const corsOptions = {
-  origin: "https://linkup-dev.vercel.app/",
+  origin: "*",
   credentials: true,
 };
 
