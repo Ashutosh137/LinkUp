@@ -14,11 +14,13 @@ export default function App() {
   const [UserName, setUserName] = useState("")
 
   const [roomJoinReq, setroomJoinReq] = useState(false)
+  const [load, setload] = useState(true)
 
-  const [roomjoinreqdata, setroomjoinreqdata] = useState({UserName,RoomName})
+  const [roomjoinreqdata, setroomjoinreqdata] = useState({ UserName, RoomName })
 
 
   useEffect(() => {
+    socket.on("connect", () => { setload(false) })
     socket.on('room-joined', ({ RoomName, UserName }: { RoomName: string; UserName: string }) => {
       toast.success(`${UserName} joined in room ${RoomName}❤️ room joined`)
       setIsInRoom(RoomName)
@@ -46,12 +48,12 @@ export default function App() {
   }, [])
 
 
-  console.log(IsInRoom)
 
 
   return (
     <Box >
       <Navbar />
+      {load && <div>loading</div>}
       <Typography my={10} variant="h4">google meet</Typography>
 
       {roomJoinReq && <Typography>req to join {roomjoinreqdata.UserName} <Button variant="contained" onClick={() => {

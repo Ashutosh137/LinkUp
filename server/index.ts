@@ -9,13 +9,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://linkup-dev.vercel.app/",
   },
 });
 const cors = require("cors");
 
 const corsOptions = {
-  origin: "*",
+  origin: "https://linkup-dev.vercel.app/",
   credentials: true,
 };
 
@@ -37,13 +37,12 @@ io.on("connection", (socket: Socket) => {
   //   socket.join(RoomName);
   //   socket.emit("room-joined", { RoomName, UserName });
   // });
-  socket.on("create-room", ({ RoomName, UserName="aashutosh" }) => {
+  socket.on("create-room", ({ RoomName, UserName = "aashutosh" }) => {
     socket.join(RoomName);
     socket.emit("room-created", { RoomName, UserName });
   });
 
-  
-  socket.on("Join-req-accepted", ({ RoomName, UserName="aashutosh" }) => {
+  socket.on("Join-req-accepted", ({ RoomName, UserName = "aashutosh" }) => {
     socket.to(RoomName).emit("join-req-accepted", { RoomName, UserName });
   });
   socket.on("req-join", ({ RoomName, UserName }) => {
