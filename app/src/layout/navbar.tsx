@@ -1,8 +1,12 @@
-import { AppBar, Box, Typography, Button, Toolbar, IconButton } from '@mui/material'
+import { AppBar, Box, Typography, Button, Toolbar, IconButton, Stack } from '@mui/material'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+import InitialStateProps from '../redux/initialprops'
 function Navbar() {
+  const { isLoggedIn } = useSelector((state: InitialStateProps) => state)
   return (
-    <Box position="fixed" height={20} sx={{ inset: 0 }}  >
-      <AppBar color='primary' >
+    <Box position="fixed" height={20} sx={{ inset: 0, zIndex: 5 }}  >
+      <AppBar sx={{ py: 1 }} color='primary' >
         <Toolbar>
           <IconButton
             size="large"
@@ -11,12 +15,18 @@ function Navbar() {
             aria-label="menu"
             sx={{ mr: 2 }}
           >
-            {/* <MenuIcon /> */}
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Google meet
-          </Typography>
-          <Button color="inherit">Login</Button>
+          <Box component={Link} to={"/"} sx={{ flexGrow: 1, textDecoration: "none", color: 'white' }}>
+            <Typography variant='h5'>Google Meet</Typography>
+          </Box>
+          {!isLoggedIn ? <Stack direction={"row"} gap={3}>
+            <Box component={Link} sx={{ textDecoration: "none", color: "white" }} to={"register"}> <Button variant='contained' color="inherit">Register</Button></Box>
+            <Box component={Link} sx={{ textDecoration: "none", color: "white" }} to={"/login"}> <Button variant='outlined' color="inherit">Login</Button></Box>
+          </Stack> :
+            <Stack direction={"row"} gap={3}>
+              <Box component={Link} sx={{ textDecoration: "none", color: "white" }} to={"/profile"}> <Button variant='outlined' color="inherit">profile</Button></Box>
+            </Stack>
+          }
         </Toolbar>
       </AppBar>
     </Box>

@@ -1,12 +1,18 @@
-import { Request, Response } from "express";
 import { Socket } from "socket.io";
-
+import helmet from "helmet";
+import conn from "./database/database";
+import router from "./Routes/Route";
+import morgen from "morgan";
+import hpp from "hpp";
+const compression = require("compression");
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-
+const sanitize = require("express-mongo-sanitize");
 const app = express();
 const server = http.createServer(app);
+const cookieParser = require("cookie-parser");
+
 const io = socketIo(server, {
   cors: {
     origin: "*",
@@ -20,15 +26,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(helmet());
+app.use(compression());
+app.use(express.json());
+app.use(sanitize());
+app.use(morgen("dev"));
+app.use(hpp());
+app.use(cookieParser());
 
-// Serve the socket.io client library (optional)
-// app.use(
-//   "/socket.io",
-//   express.static(__dirname + "/node_modules/socket.io/client-dist")
-// );
-app.get("/", (req: Request, res: Response) => {
-  res.send("server");
-});
+app.use("/", router);
 
 io.on("connection", (socket: Socket) => {
   console.log("New client connected", socket.id);
@@ -75,6 +81,9 @@ io.on("connection", (socket: Socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+conn.then(() => {
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });

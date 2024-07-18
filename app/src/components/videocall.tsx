@@ -1,10 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import socket from "../socket";
+import socket from "../config/socket";
 import toast from "react-hot-toast";
-import CardMedia from '@mui/material/CardMedia'
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
+import Video from "../layout/video";
+import { useParams } from "react-router-dom";
 
-export default function Video({ room }: { room: string }) {
+export default function VideoCall() {
+    const { meetid } = useParams()
     const localref = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -50,7 +52,7 @@ export default function Video({ room }: { room: string }) {
                     console.log(message)
                     setmessages(prev => ([...prev, message]))
                 });
-                socket.on("room-joined", () => {
+                socket.on("meetid-joined", () => {
                 });
 
             } catch (error) {
@@ -64,7 +66,7 @@ export default function Video({ room }: { room: string }) {
         return () => {
             socket.off('offer', handleOffer);
             socket.off('answer', handleAnswer);
-            socket.emit("user-disconnect", ({ room }));
+            socket.emit("user-disconnect", ({ meetid }));
             socket.off('candidate', handleCandidate);
         };
     }, []);
@@ -77,7 +79,7 @@ export default function Video({ room }: { room: string }) {
         await peerConnectionRef.current!.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnectionRef.current!.createAnswer();
         await peerConnectionRef.current!.setLocalDescription(answer);
-        socket.emit('answer', { answer, room });
+        socket.emit('answer', { answer, meetid });
     };
     const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
         if (!peerConnectionRef.current) return;
@@ -96,11 +98,11 @@ export default function Video({ room }: { room: string }) {
     const startCall = async () => {
         const offer = await peerConnectionRef.current!.createOffer();
         await peerConnectionRef.current!.setLocalDescription(offer);
-        socket.emit('offer', { offer, room });
+        socket.emit('offer', { offer, meetid });
     };
     return (
         <Fragment>
-            <Typography variant="h6" my={2} alignItems={"center"} color="initial">Room - {room}</Typography>
+            <Typography variant="h6" my={2} alignItems={"center"} color="initial">meet - {meetid}</Typography>
             <Box>
                 <Button variant="contained" onClick={startCall}>Start Call</Button>
                 {messages.map((message, index) => (
@@ -108,12 +110,12 @@ export default function Video({ room }: { room: string }) {
                 ))}
 
                 <Stack height={"80%"} my={5} direction={"row"} gap={5}>
-                    <CardMedia sx={{ width: "100%", margin: "auto", borderRadius: 10 }} component={"video"} ref={localref} autoPlay playsInline muted />
-                    <CardMedia sx={{ width: "100%", margin: "auto", borderRadius: 10 }} component={"video"} ref={remoteVideoRef} autoPlay playsInline />
+                    <Video ref={localref} muted />
+                    <Video ref={remoteVideoRef} />
                 </Stack>
                 <Stack component={"form"} alignItems={"center"} gap={2} direction={"row"} onSubmit={(e) => {
                     e.preventDefault()
-                    socket.emit("new-message", { room, message });
+                    socket.emit("new-message", { meetid, message });
                     setmessage("")
                 }}>
                     <TextField fullWidth label="message" value={message} onChange={(e) => setmessage(e.target.value)} type="text" />
