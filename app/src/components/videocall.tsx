@@ -4,14 +4,32 @@ import toast from "react-hot-toast";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import Video from "../layout/video";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import InitialStateProps from "../redux/initialprops";
 
 export default function VideoCall() {
     const { meetid } = useParams()
+    const { name } = useSelector((state: InitialStateProps) => state)
     const localref = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-    const [messages, setmessages] = useState<string[]>([]);
+    const [messages, setmessages] = useState<Message[]>([]);
     const [message, setmessage] = useState("");
+    const [Req_Join_room, setReq_Join_room] = useState(false)
+    const [InRoom, setInRoom] = useState<boolean>(true)
+
+
+    interface Newcandidate {
+        name: string;
+        room: string
+    }
+
+    interface Message {
+        name: string;
+        message: string;
+        created_at: string;
+    }
+    const [NewCandidate, setNewCandidate] = useState<Newcandidate>({ name: "", room: "" })
 
 
     useEffect(() => {
@@ -30,6 +48,7 @@ export default function VideoCall() {
                     ]
                 });
 
+
                 stream.getTracks().forEach(track => {
                     peerConnectionRef.current!.addTrack(track, stream);
                 });
@@ -44,8 +63,22 @@ export default function VideoCall() {
                     }
                 };
 
+                socket.emit("join-room", { room: meetid })
+
+                socket.on('join-req-accepted', ({ RoomName, name }: { RoomName: string; name: string }) => {
+                    toast.success(`${name} accepted in room ${RoomName}❤️`)
+                    setInRoom(true)
+                })
+                socket.on('req-join', (data => {
+                    toast(`${data.name} req to join in room ${data.RoomName}❤️`)
+                    console.log(data)
+                    setReq_Join_room(true)
+                    setNewCandidate(data)
+                }))
+
+
                 socket.on('offer', handleOffer);
-                socket.on('user disconnected', handleDisconnect);
+                // socket.on('user disconnected', handleDisconnect);
                 socket.on('answer', handleAnswer);
                 socket.on('candidate', handleCandidate);
                 socket.on("chat", (message) => {
@@ -61,7 +94,7 @@ export default function VideoCall() {
         };
 
         initWebRTC();
-        startCall();
+        // startCall();
 
         return () => {
             socket.off('offer', handleOffer);
@@ -71,15 +104,15 @@ export default function VideoCall() {
         };
     }, []);
 
-    const handleDisconnect = (username: string) => {
-        toast.error(`user ${username} disconnected`)
-    }
+    // const handleDisconnect = (username: string) => {
+    //     toast.error(`user ${username} disconnected`)
+    // }
     const handleOffer = async (offer: RTCSessionDescriptionInit) => {
         if (!peerConnectionRef.current) return;
         await peerConnectionRef.current!.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnectionRef.current!.createAnswer();
         await peerConnectionRef.current!.setLocalDescription(answer);
-        socket.emit('answer', { answer, meetid });
+        socket.emit('answer', { answer, room: meetid });
     };
     const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
         if (!peerConnectionRef.current) return;
@@ -96,32 +129,66 @@ export default function VideoCall() {
     };
 
     const startCall = async () => {
+        console.log("peerConnectionRef", peerConnectionRef)
         const offer = await peerConnectionRef.current!.createOffer();
         await peerConnectionRef.current!.setLocalDescription(offer);
-        socket.emit('offer', { offer, meetid });
+        socket.emit('offer', { offer, room: meetid });
     };
     return (
         <Fragment>
             <Typography variant="h6" my={2} alignItems={"center"} color="initial">meet - {meetid}</Typography>
-            <Box>
-                <Button variant="contained" onClick={startCall}>Start Call</Button>
-                {messages.map((message, index) => (
-                    <Typography key={index}>{message}</Typography>
-                ))}
-
-                <Stack height={"80%"} my={5} direction={"row"} gap={5}>
-                    <Video ref={localref} muted />
-                    <Video ref={remoteVideoRef} />
-                </Stack>
-                <Stack component={"form"} alignItems={"center"} gap={2} direction={"row"} onSubmit={(e) => {
-                    e.preventDefault()
-                    socket.emit("new-message", { meetid, message });
-                    setmessage("")
+            {Req_Join_room && <Stack gap={4} border={1} p={2} direction={"row"} justifyContent={"center"} alignItems={"center"}>
+                <Typography variant="body1" color="initial"> {NewCandidate.name} want to join </Typography>
+                <Button variant="contained" color="success" onClick={() => {
+                    socket.emit("Join-req-accepted", { name, RoomName: meetid })
+                    setReq_Join_room(false)
+                    setNewCandidate({ name: "", room: "" })
                 }}>
-                    <TextField fullWidth label="message" value={message} onChange={(e) => setmessage(e.target.value)} type="text" />
-                    <Button type="submit" variant="contained">Message</Button>
-                </Stack>
-            </Box>
+                    accept
+                </Button>
+                <Button variant="contained" color="warning" onClick={() => {
+                    socket.emit("Join-req-rejected", { name, RoomName: meetid })
+                    setReq_Join_room(false)
+                    setNewCandidate({ name: "", room: "" })
+                }}>
+                    Reject
+                </Button>
+            </Stack>}
+            {InRoom ?
+                <Box>
+                    <Button variant="contained" onClick={startCall}>Start Call</Button>
+                    {messages.map((message, index) => (
+                        <Stack gap={3} direction={"row"} key={index}>
+                            <Typography variant="body1" color="initial">{message.name}</Typography>
+                            <Typography variant="body2" color="initial">{message.message}</Typography>
+                            <Typography variant="caption" color="initial">{message.created_at}</Typography>
+                        </Stack>
+                    ))}
+
+                    <Stack height={"80%"} my={5} direction={"row"} gap={5}>
+                        <Video ref={localref} muted />
+                        <Video ref={remoteVideoRef} />
+                    </Stack>
+
+                    {/* message */}
+                    <Stack component={"form"} alignItems={"center"} gap={2} direction={"row"} onSubmit={(e) => {
+                        e.preventDefault()
+                        const messagebox: Message = {
+                            name: name,
+                            message: message,
+                            created_at: new Date().toLocaleString()
+
+                        }
+                        socket.emit("new-message", { room: meetid, message: messagebox });
+                        setmessage("")
+                    }}>
+                        <TextField fullWidth label="message" value={message} onChange={(e) => setmessage(e.target.value)} type="text" />
+                        <Button type="submit" variant="contained">Message</Button>
+                    </Stack>
+                </Box>
+                :
+                <Button variant="contained">Join Room</Button>}
+
         </Fragment>
     )
 }

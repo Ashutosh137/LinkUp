@@ -63,7 +63,7 @@ const counterSlice = createSlice({
             state.name = "";
             state.email = "";
             state._id = "";
-            localStorage.setItem("id", "");
+            localStorage.setItem("token", "");
         },
 
     },
@@ -95,6 +95,7 @@ export const Signin = (email: string, password: string) => async (dispatch: Disp
             toast.success("login successfully");
             const res = await data.json()
             dispatch(signinSuccess(res.token));
+            AutoLogin()
         }
         else {
             const res = await data.json();

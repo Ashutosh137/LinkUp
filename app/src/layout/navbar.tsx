@@ -2,8 +2,11 @@ import { AppBar, Box, Typography, Button, Toolbar, IconButton, Stack } from '@mu
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import InitialStateProps from '../redux/initialprops'
+import { useAppDispatch } from '../redux/ḥooks'
+import { logout } from '../redux/userdataSlice'
 function Navbar() {
   const { isLoggedIn } = useSelector((state: InitialStateProps) => state)
+  const dispatch=useAppDispatch()
   return (
     <Box position="fixed" height={20} sx={{ inset: 0, zIndex: 5 }}  >
       <AppBar sx={{ py: 1 }} color='primary' >
@@ -25,6 +28,9 @@ function Navbar() {
           </Stack> :
             <Stack direction={"row"} gap={3}>
               <Box component={Link} sx={{ textDecoration: "none", color: "white" }} to={"/profile"}> <Button variant='outlined' color="inherit">profile</Button></Box>
+              <Box  sx={{ textDecoration: "none", color: "white" }}> <Button variant='contained' onClick={()=>{
+                dispatch(logout())
+              }} color="inherit">Logout</Button></Box>
             </Stack>
           }
         </Toolbar>
