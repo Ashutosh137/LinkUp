@@ -14,8 +14,6 @@ import { GoogleLogin } from "@react-oauth/google";
 import InitialStateProps from "../redux/initialprops";
 import { Signin } from "../redux/userdataSlice";
 import { useAppDispatch } from "../redux/ḥooks";
-// import FormDialog from "./forgetdialog";
-// import toast from "react-hot-toast";
 
 function Login() {
     const { error, isLoggedIn } = useSelector(

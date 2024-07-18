@@ -132,7 +132,6 @@ export function signup(email: string, password: string, name: string) {
 }
 export function AutoLogin() {
     return async (dispatch: Dispatch) => {
-        dispatch(signinStart());
         const token = localStorage.getItem("token")
         if (token) {
             try {

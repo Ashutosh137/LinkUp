@@ -16,7 +16,6 @@ export default function VideoCall() {
     const [messages, setmessages] = useState<Message[]>([]);
     const [message, setmessage] = useState("");
     const [Req_Join_room, setReq_Join_room] = useState(false)
-    const [InRoom, setInRoom] = useState<boolean>(true)
 
 
     interface Newcandidate {
@@ -67,7 +66,6 @@ export default function VideoCall() {
 
                 socket.on('join-req-accepted', ({ RoomName, name }: { RoomName: string; name: string }) => {
                     toast.success(`${name} accepted in room ${RoomName}❤️`)
-                    setInRoom(true)
                 })
                 socket.on('req-join', (data => {
                     toast(`${data.name} req to join in room ${data.RoomName}❤️`)
@@ -94,7 +92,8 @@ export default function VideoCall() {
         };
 
         initWebRTC();
-        // startCall();
+
+
 
         return () => {
             socket.off('offer', handleOffer);
@@ -103,6 +102,12 @@ export default function VideoCall() {
             socket.off('candidate', handleCandidate);
         };
     }, []);
+
+    useEffect(() => {
+        if (peerConnectionRef.current) {
+            startCall()
+        }
+    }, [peerConnectionRef.current])
 
     // const handleDisconnect = (username: string) => {
     //     toast.error(`user ${username} disconnected`)
@@ -154,40 +159,38 @@ export default function VideoCall() {
                     Reject
                 </Button>
             </Stack>}
-            {InRoom ?
-                <Box>
-                    <Button variant="contained" onClick={startCall}>Start Call</Button>
-                    {messages.map((message, index) => (
-                        <Stack gap={3} direction={"row"} key={index}>
-                            <Typography variant="body1" color="initial">{message.name}</Typography>
-                            <Typography variant="body2" color="initial">{message.message}</Typography>
-                            <Typography variant="caption" color="initial">{message.created_at}</Typography>
-                        </Stack>
-                    ))}
-
-                    <Stack height={"80%"} my={5} direction={"row"} gap={5}>
-                        <Video ref={localref} muted />
-                        <Video ref={remoteVideoRef} />
+            <Box>
+                <Button variant="contained" onClick={startCall}>Start Call</Button>
+                {messages.map((message, index) => (
+                    <Stack gap={3} direction={"row"} key={index}>
+                        <Typography variant="body1" color="initial">{message.name}</Typography>
+                        <Typography variant="body2" color="initial">{message.message}</Typography>
+                        <Typography variant="caption" color="initial">{message.created_at}</Typography>
                     </Stack>
+                ))}
 
-                    {/* message */}
-                    <Stack component={"form"} alignItems={"center"} gap={2} direction={"row"} onSubmit={(e) => {
-                        e.preventDefault()
-                        const messagebox: Message = {
-                            name: name,
-                            message: message,
-                            created_at: new Date().toLocaleString()
+                <Stack height={"80%"} my={5} direction={"row"} gap={5}>
+                    <Video ref={localref} muted />
+                    <Video ref={remoteVideoRef} />
+                </Stack>
 
-                        }
-                        socket.emit("new-message", { room: meetid, message: messagebox });
-                        setmessage("")
-                    }}>
-                        <TextField fullWidth label="message" value={message} onChange={(e) => setmessage(e.target.value)} type="text" />
-                        <Button type="submit" variant="contained">Message</Button>
-                    </Stack>
-                </Box>
-                :
-                <Button variant="contained">Join Room</Button>}
+                {/* message */}
+                <Stack component={"form"} alignItems={"center"} gap={2} direction={"row"} onSubmit={(e) => {
+                    e.preventDefault()
+                    const messagebox: Message = {
+                        name: name,
+                        message: message,
+                        created_at: new Date().toLocaleString()
+
+                    }
+                    socket.emit("new-message", { room: meetid, message: messagebox });
+                    setmessage("")
+                }}>
+                    <TextField fullWidth label="message" value={message} onChange={(e) => setmessage(e.target.value)} type="text" />
+                    <Button type="submit" variant="contained">Message</Button>
+                </Stack>
+            </Box>
+
 
         </Fragment>
     )

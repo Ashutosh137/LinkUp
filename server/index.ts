@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { Socket } from "socket.io";
 import helmet from "helmet";
 import conn from "./database/database";
@@ -68,7 +69,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("offer", ({ room, offer }) => {
-    console.log(offer,room)
+    console.log(offer, room);
     socket.to(room).emit("offer", offer);
   });
   socket.on("user-disconnect", ({ room, name }) => {
