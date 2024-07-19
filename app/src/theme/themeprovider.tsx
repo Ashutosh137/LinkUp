@@ -13,9 +13,6 @@ export type RootState = ReturnType<AppStore['getState']>
 export type AppDispatch = AppStore['dispatch']
 
 function UseThemeProvider({ children }: { children: React.ReactNode }) {
-
-
-
     const darkTheme = createTheme({
         palette: {
             mode: 'dark',
@@ -29,7 +26,7 @@ function UseThemeProvider({ children }: { children: React.ReactNode }) {
     })
     return (
         <ThemeProvider theme={darkTheme}>
-            <GoogleOAuthProvider clientId=''>
+            <GoogleOAuthProvider clientId={import.meta.env.GoogleID || "968876228042-j09n0eurn0v9egbbo7rkovbgv3664c8p.apps.googleusercontent.com"}>
                 <Provider store={store}>
                     {children}
                 </Provider>

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { CredentialResponse } from "@react-oauth/google";
 import { createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
 const backend_url = import.meta.env.VITE_BACKEND_DEV || import.meta.env.VITE_BACKEND
@@ -27,6 +28,7 @@ const counterSlice = createSlice({
         signinSuccess: (state, action) => {
             state.isLoading = false;
             state.isLoggedIn = true;
+            console.log(action.payload)
             localStorage.setItem("token", action.payload)
         },
         AutoLoginsuccess: (state, action) => {
@@ -153,6 +155,52 @@ export function AutoLogin() {
             } catch (error) {
                 dispatch(AutoLoginfailure());
             }
+        }
+    }
+}
+export function GoogleLogin(cradit: CredentialResponse) {
+    return async (dispatch: Dispatch) => {
+        try {
+            const data = await fetch(`${backend_url}google/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token: cradit.credential })
+            });
+            if (data.ok) {
+                const res = await data.json();
+                dispatch(signinSuccess(res.token));
+            }
+            else {
+                const res = await data.json();
+                dispatch(signinFailure(res.message));
+            }
+        } catch (error) {
+            dispatch(AutoLoginfailure());
+        }
+    }
+}
+export function GoogleSignup(cradit: CredentialResponse) {
+    return async (dispatch: Dispatch) => {
+        try {
+            const data = await fetch(`${backend_url}google/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token: cradit.credential })
+            });
+            if (data.ok) {
+                const res = await data.json();
+                dispatch(signupSuccess(res.data));
+            }
+            else {
+                const res = await data.json();
+                dispatch(signupfailure(res.message));
+            }
+        } catch (error) {
+            dispatch(signupfailure(error));
         }
     }
 }

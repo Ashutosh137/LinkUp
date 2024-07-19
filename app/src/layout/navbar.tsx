@@ -27,7 +27,6 @@ function Navbar() {
             <Box component={Link} sx={{ textDecoration: "none", color: "white" }} to={"/login"}> <Button variant='outlined' color="inherit">Login</Button></Box>
           </Stack> :
             <Stack direction={"row"} gap={3}>
-              <Box component={Link} sx={{ textDecoration: "none", color: "white" }} to={"/profile"}> <Button variant='outlined' color="inherit">profile</Button></Box>
               <Box  sx={{ textDecoration: "none", color: "white" }}> <Button variant='contained' onClick={()=>{
                 dispatch(logout())
               }} color="inherit">Logout</Button></Box>

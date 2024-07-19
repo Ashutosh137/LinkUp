@@ -5,9 +5,10 @@ import { Stack, Typography, Button } from "@mui/material";
 import { useSelector } from "react-redux";
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
-import { signup } from "../redux/userdataSlice";
+import { GoogleSignup, signup } from "../redux/userdataSlice";
 import InitialStateProps from "../redux/initialprops";
 import { useAppDispatch } from "../redux/ḥooks";
+import toast from "react-hot-toast";
 
 function Register() {
     const { error, isSignup } = useSelector(
@@ -43,9 +44,9 @@ function Register() {
             >
                 <Button variant="text" color="primary">
                     <GoogleLogin
-                        onSuccess={() => { }}
+                        onSuccess={(cradit) => { dispatch(GoogleSignup(cradit)) }}
                         onError={() => {
-                            console.log("Login Failed");
+                            toast.error("Register failed")
                         }}
                     />
                 </Button>
@@ -62,7 +63,7 @@ function Register() {
                 component={"form"}
                 onSubmit={async (e) => {
                     e.preventDefault();
-                   dispatch(signup(email, pass, name))
+                    dispatch(signup(email, pass, name))
 
                 }}
                 spacing={2}
@@ -90,6 +91,7 @@ function Register() {
                     onChange={(e) => {
                         setname(e.target.value);
                     }}
+                    required
                 />
                 <TextField
                     fullWidth
@@ -106,6 +108,8 @@ function Register() {
                     onChange={(e) => {
                         setemail(e.target.value);
                     }}
+
+                    required
                 />
                 <TextField
                     id="password"
@@ -120,6 +124,7 @@ function Register() {
                     onChange={(e) => {
                         setpass(e.target.value);
                     }}
+                    required
                 />
 
                 <Box justifyContent={"center"}>

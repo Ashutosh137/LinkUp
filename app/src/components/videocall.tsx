@@ -98,7 +98,7 @@ export default function VideoCall() {
             socket.off('answer', handleAnswer);
             socket.off('candidate', handleCandidate);
             socket.off('stream-toggle');
-            socket.emit("user-disconnect", { meetid });
+            socket.emit("user-disconnect", { meetid,name });
         };
     }, [initWebRTC, meetid]);
 
@@ -225,7 +225,6 @@ export default function VideoCall() {
                                 color="error"
                                 onClick={() => {
                                     socket.emit('Join-req-rejected', { name, RoomName: meetid });
-                                    // Reset state
                                 }}
                             >
                                 <Cancel />
