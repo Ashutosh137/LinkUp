@@ -30,7 +30,7 @@ export default function Home() {
             toast.success(`${name} accepted in room ${RoomName}❤️`)
             navigate(`/meet/${RoomName}`)
         })
-        socket.on('join-req-rejected', ({ RoomName, name }: {
+        socket.on('Join-req-rejected', ({ RoomName, name }: {
             RoomName: string; name: string
         }) => {
             toast.error(`${name} rejected in room ${RoomName}😢`)

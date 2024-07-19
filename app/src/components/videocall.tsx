@@ -205,16 +205,17 @@ export default function VideoCall() {
             </Stack>
 
             {reqJoinRoom && (
-                <Paper elevation={6} sx={{ padding: 3, marginBottom: 3, background: 'linear-gradient(135deg, #f5f5f5, #e0e0e0)' }}>
-                    <Stack gap={4} direction="row" justifyContent="center" alignItems="center">
-                        <Typography variant="body1" color="textPrimary" sx={{ flexGrow: 1 }}>
-                            {newCandidate.name} wants to join
+                <Paper  elevation={6} sx={{ padding: 3, marginBottom: 3,borderRadius:2 ,bgcolor:"black"}}>
+                    <Stack mx="auto" gap={4} direction="row" justifyContent="center" alignItems="center">
+                        <Typography variant="body1" color="white" sx={{ flexGrow: 1 }}>
+                           <b> {newCandidate.name}</b> wants to join
                         </Typography>
-                        <Tooltip title="Accept">
+                        <Tooltip color="primary" title="Accept">
                             <IconButton
                                 color="success"
                                 onClick={() => {
                                     socket.emit('Join-req-accepted', { name, RoomName: meetid });
+                                    setReqJoinRoom(false);
                                 }}
                             >
                                 <CheckCircle />
@@ -225,6 +226,7 @@ export default function VideoCall() {
                                 color="error"
                                 onClick={() => {
                                     socket.emit('Join-req-rejected', { name, RoomName: meetid });
+                                    setReqJoinRoom(false);
                                 }}
                             >
                                 <Cancel />

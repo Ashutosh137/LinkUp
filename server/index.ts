@@ -45,7 +45,7 @@ io.on("connection", (socket: Socket) => {
     socket.join(room);
     socket.emit("room-joined", { room });
   });
-  socket.on("create-room", async ({ name = "aashutosh" }) => {
+  socket.on("create-room", async ({ name }) => {
     const RoomName = Createroom();
     socket.join(RoomName);
     socket.emit("room-created", { RoomName, name });
@@ -55,8 +55,11 @@ io.on("connection", (socket: Socket) => {
     socket.to(RoomName).emit("req-join", { RoomName, name });
   });
 
-  socket.on("Join-req-accepted", ({ RoomName, name = "aashutosh" }) => {
+  socket.on("Join-req-accepted", ({ RoomName, name }) => {
     socket.to(RoomName).emit("join-req-accepted", { RoomName, name });
+  });
+  socket.on("Join-req-rejected", ({ RoomName, name }) => {
+    socket.to(RoomName).emit("Join-req-rejected", { RoomName, name });
   });
 
   socket.on("disconnect", () => {
@@ -77,7 +80,7 @@ io.on("connection", (socket: Socket) => {
   socket.on("answer", ({ room, answer }) => {
     socket.to(room).emit("answer", answer);
   });
-  socket.on("stream-toggle", ({ newStreamType,room }) => {
+  socket.on("stream-toggle", ({ newStreamType, room }) => {
     socket.to(room).emit("answer", newStreamType);
   });
 
