@@ -64,12 +64,10 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("new-message", ({ room, message }) => {
-    console.log(message, room);
     io.to(room).emit("chat", message);
   });
 
   socket.on("offer", ({ room, offer }) => {
-    console.log(offer, room);
     socket.to(room).emit("offer", offer);
   });
   socket.on("user-disconnect", ({ room, name }) => {
@@ -78,6 +76,9 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("answer", ({ room, answer }) => {
     socket.to(room).emit("answer", answer);
+  });
+  socket.on("stream-toggle", ({ newStreamType,room }) => {
+    socket.to(room).emit("answer", newStreamType);
   });
 
   socket.on("candidate", (data) => {

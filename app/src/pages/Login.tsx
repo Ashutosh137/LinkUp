@@ -3,12 +3,6 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { Stack, Typography, Button } from "@mui/material";
 import { useSelector } from "react-redux";
-// import {
-//     //   Signin,
-//     signinStart,
-//     signinSuccess,
-//     //   signup,
-// } from "../redux/userdataSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import InitialStateProps from "../redux/initialprops";
@@ -133,12 +127,6 @@ function Login() {
                 <Box my={2} component={Link} sx={{ textDecoration: "none" }} to={"/register"} color="initial"><Typography variant="body2" color="initial">Not Signup Yet , Login Here</Typography></Box>
 
             </Stack>
-            {/* {
-                <FormDialog
-                    toggle={() => setforgetpassworddialog((prev) => !prev)}
-                    open={forgetpassworddialog}
-                />
-            } */}
         </Fragment>
     );
 }
