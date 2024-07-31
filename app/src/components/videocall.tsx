@@ -185,6 +185,8 @@ export default function VideoCall() {
         setMessage("");
     };
 
+    console.log(peerConnectionRef.current)
+
     return (
         <Fragment>
             <Typography variant="h4" my={4} align="center" color="textPrimary" sx={{ fontWeight: 'bold' }}>
