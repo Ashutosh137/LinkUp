@@ -117,7 +117,7 @@ export default function VideoCall() {
         } catch (error) {
             console.error('Error handling offer:', error);
         }
-    }, [meetid]);
+    }, []);
 
     const handleAnswer = useCallback(async (answer: RTCSessionDescriptionInit) => {
         if (!peerConnectionRef.current) return;
@@ -137,7 +137,12 @@ export default function VideoCall() {
         if (!peerConnectionRef.current) return;
 
         try {
-            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+            if (peerConnectionRef.current.signalingState === 'stable') {
+                console.warn('Peer connection is in stable state, no offer to process');
+            }
+
+            console.log(peerConnectionRef.current.remoteDescription)
+           peerConnectionRef.current.remoteDescription&& await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
         } catch (error) {
             console.error('Error adding ICE candidate:', error);
         }
