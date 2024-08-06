@@ -61,6 +61,13 @@ io.on("connection", (socket: Socket) => {
   socket.on("Join-req-rejected", ({ RoomName, name }) => {
     socket.to(RoomName).emit("Join-req-rejected", { RoomName, name });
   });
+  socket.on("emoji", ({ room, emoji }) => {
+    socket.to(room).emit("emoji", { emoji });
+  });
+  socket.on("call end", ({ room }) => {
+    socket.to(room).emit("call end");
+    socket.leave(room);
+  });
 
   socket.on("disconnect", () => {
     console.log("disconnect");
