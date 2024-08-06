@@ -132,6 +132,7 @@ export default function VideoCall() {
       await peerConnectionRef.current.setRemoteDescription(
         new RTCSessionDescription(offer)
       );
+      console.log("creating offer")
       const answer = await peerConnectionRef.current.createAnswer();
       await peerConnectionRef.current.setLocalDescription(answer);
       socket.emit('answer', { answer, room: meetid });
@@ -150,6 +151,8 @@ export default function VideoCall() {
             'Peer connection is not in the right state to set answer'
           );
         }
+
+        console.log("getting offer , creating asweer")
 
         await peerConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(answer)
@@ -171,6 +174,8 @@ export default function VideoCall() {
             'Peer connection is in stable state, no offer to process'
           );
         }
+
+        console.log("getting candidate")
 
         peerConnectionRef.current.remoteDescription &&
           (await peerConnectionRef.current.addIceCandidate(
