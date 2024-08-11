@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState, useCallback } from 'react';
 import socket from '../config/socket';
 import toast from 'react-hot-toast';
-import { Box, Stack } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import Video from '../layout/video';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -17,6 +17,7 @@ export default function VideoCall() {
   const localRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const [NewMessage, setNewMessage] = useState(false)
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<string>('');
@@ -59,8 +60,8 @@ export default function VideoCall() {
         peerConnectionRef.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
+            console.log('Track added to remote:', event.track);
           }
-          console.log('Track added:', event.track);
         };
 
         // peerConnectionRef.current.onicecandidate = async (event) => {
@@ -104,6 +105,7 @@ export default function VideoCall() {
       socket.on('answer', handleAnswer);
       socket.on('candidate', handleCandidate);
       socket.on('chat', (message: Message) => {
+        setNewMessage(true)
         setMessages((prev) => [...prev, message]);
       });
     } catch (error) {
@@ -112,11 +114,8 @@ export default function VideoCall() {
     }
   }, [meetid]);
 
-  console.log(peerConnectionRef)
-
   useEffect(() => {
     initWebRTC();
-
     return () => {
       if (peerConnectionRef.current) {
         peerConnectionRef.current.close();
@@ -126,7 +125,7 @@ export default function VideoCall() {
       socket.off('candidate', handleCandidate);
       socket.emit('user-disconnect', { meetid, name });
     };
-  }, [ meetid]);
+  }, [meetid]);
 
   const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {
     if (!peerConnectionRef.current) return;
@@ -180,6 +179,7 @@ export default function VideoCall() {
 
   const startCall = useCallback(async () => {
     if (!peerConnectionRef.current) return;
+    if (peerConnectionRef.current.signalingState !== "stable") return;
 
     try {
       const offer = await peerConnectionRef.current.createOffer();
@@ -207,11 +207,12 @@ export default function VideoCall() {
 
   return (
     <Fragment>
-      <button onClick={() => { startCall() }}>start call</button>
+      <Button variant='outlined' size='medium' onClick={() => { startCall() }}>start call</Button>
       {ChatBox && (
         <MessageBox
           messages={messages}
           setMessage={setMessage}
+          setNewMessage={setNewMessage}
           message={message}
           handleMessageSubmit={handleMessageSubmit}
         />
@@ -231,7 +232,7 @@ export default function VideoCall() {
           <Video ref={remoteVideoRef} remote />
         </Stack>
       </Box>
-      <CallController meetid={meetid!} />
+      <CallController NewMessage={NewMessage} meetid={meetid!} />
     </Fragment>
   );
 }

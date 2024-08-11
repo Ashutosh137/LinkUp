@@ -16,6 +16,7 @@ import {
     Box,
     Dialog,
     DialogTitle,
+    Badge,
 } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { ToggleChatBox } from '../redux/slice/userdataSlice';
@@ -29,9 +30,10 @@ import Sound from '../utiliies/sound';
 
 interface CallControllerProps {
     meetid: string;
+    NewMessage: boolean;
 }
 
-const CallController: React.FC<CallControllerProps> = ({ meetid }) => {
+const CallController: React.FC<CallControllerProps> = ({ meetid, NewMessage }) => {
     const { ChatBox } = useAppSelector((state) => state);
     const dispatch = useDispatch();
     const naviagate = useNavigate();
@@ -41,6 +43,8 @@ const CallController: React.FC<CallControllerProps> = ({ meetid }) => {
     const handleChat = () => {
         dispatch(ToggleChatBox());
     };
+
+    console.log(NewMessage)
 
     const handleCopyMeetId = () => {
         navigator.clipboard.writeText(meetid);
@@ -108,7 +112,7 @@ const CallController: React.FC<CallControllerProps> = ({ meetid }) => {
                         </IconButton>
                     </Tooltip>
                     <IconButton aria-label="chatbox" onClick={handleChat} color="primary">
-                        {ChatBox ? <ChatBubble /> : <ChatTwoTone />}
+                        {!ChatBox ? <Badge color="info" badgeContent={NewMessage ? 1 : null}><ChatTwoTone/></Badge> : <ChatBubble />}
                     </IconButton>
                     <Tooltip title="End Call">
                         <IconButton onClick={handleEndCall} color="warning">

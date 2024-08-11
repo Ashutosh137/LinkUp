@@ -10,7 +10,7 @@ import {
 import { Message as Messagess } from './message';
 import { useDispatch } from 'react-redux';
 import { ToggleChatBox } from '../redux/slice/userdataSlice';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect } from 'react';
 
 interface Message {
   name: string;
@@ -22,14 +22,20 @@ function MessageBox({
   messages,
   message,
   setMessage,
+  setNewMessage,
   handleMessageSubmit,
 }: {
   messages: Message[];
   message: string;
   setMessage: (message: string) => void;
+  setNewMessage: (NewMessage: boolean) => void;
   handleMessageSubmit: FormEventHandler;
 }) {
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setNewMessage(false)
+  }, [])
 
   return (
     <Box
