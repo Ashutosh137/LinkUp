@@ -9,7 +9,7 @@ const AutoLogin = async (req: Request, res: Response) => {
 
     const decoded = jwt.verify(
       Jwt_token,
-      (process.env.JWT_SECRET as string) || "123"
+      (process.env.JWT_SECRET as string) || "123",
     );
     if (typeof decoded === "string" || !("email" in decoded)) {
       return res.status(400).json({ error: "Invalid token payload" });

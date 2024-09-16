@@ -85,7 +85,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("answer", ({ room, answer }) => {
-    console.log("getting asnwer")
+    console.log("getting asnwer");
     socket.to(room).emit("answer", answer);
   });
   socket.on("stream-toggle", ({ newStreamType, room }) => {

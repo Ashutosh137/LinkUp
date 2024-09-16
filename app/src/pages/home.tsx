@@ -74,7 +74,7 @@ export default function Home() {
     e.preventDefault();
     if (isLoggedIn) {
       socket.emit('req-join', { name, RoomName });
-      toast("join request sended to Admin")
+      toast('join request sended to Admin');
     } else {
       toast.error('Please Login first');
       navigate('/login');

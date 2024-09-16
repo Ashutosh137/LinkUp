@@ -17,8 +17,7 @@ const GoogleRegister = async (req: Request, res: Response) => {
 
     if (alreadyExist) {
       return res.status(403).json({ message: "user already exist" });
-    } 
-    else {
+    } else {
       const user = await User.create({
         email: payload.email,
         name: payload.name,

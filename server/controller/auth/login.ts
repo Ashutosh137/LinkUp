@@ -6,7 +6,7 @@ import { compare } from "bcryptjs";
 const Login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email ,signin:"email" });
+    const user = await User.findOne({ email, signin: "email" });
     if (!user) return res.status(400).json({ message: "User not found" });
     const isPassMatch = await compare(password, user.password!);
     if (!isPassMatch)
@@ -17,7 +17,7 @@ const Login = async (req: Request, res: Response) => {
         process.env.JWT_SECRET || "123",
         {
           expiresIn: "3 days",
-        }
+        },
       );
       return res
         .cookie("token", token, {

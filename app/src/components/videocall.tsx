@@ -17,7 +17,7 @@ export default function VideoCall() {
   const localRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const [NewMessage, setNewMessage] = useState(false)
+  const [NewMessage, setNewMessage] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState<string>('');
@@ -55,7 +55,6 @@ export default function VideoCall() {
         peerConnectionRef.current = new RTCPeerConnection({
           iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
         });
-
 
         peerConnectionRef.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
@@ -105,7 +104,7 @@ export default function VideoCall() {
       socket.on('answer', handleAnswer);
       socket.on('candidate', handleCandidate);
       socket.on('chat', (message: Message) => {
-        setNewMessage(true)
+        setNewMessage(true);
         setMessages((prev) => [...prev, message]);
       });
     } catch (error) {
@@ -132,9 +131,13 @@ export default function VideoCall() {
 
     try {
       if (peerConnectionRef.current.signalingState !== 'stable') {
-        console.warn('Peer connection is not in stable state, cannot handle offer');
+        console.warn(
+          'Peer connection is not in stable state, cannot handle offer'
+        );
       } else {
-        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+        await peerConnectionRef.current.setRemoteDescription(
+          new RTCSessionDescription(offer)
+        );
         console.log('Set remote offer:', offer);
         const answer = await peerConnectionRef.current.createAnswer();
         await peerConnectionRef.current.setLocalDescription(answer);
@@ -146,40 +149,52 @@ export default function VideoCall() {
     }
   }, []);
 
-  const handleAnswer = useCallback(async (answer: RTCSessionDescriptionInit) => {
-    if (!peerConnectionRef.current) return;
+  const handleAnswer = useCallback(
+    async (answer: RTCSessionDescriptionInit) => {
+      if (!peerConnectionRef.current) return;
 
-    try {
-      if (peerConnectionRef.current) {
-        console.log("getting answer")
-        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
-        console.log('Set remote answer:', answer);
-      } else {
-        console.warn('Peer connection is not in the right state to set answer');
+      try {
+        if (peerConnectionRef.current) {
+          console.log('getting answer');
+          await peerConnectionRef.current.setRemoteDescription(
+            new RTCSessionDescription(answer)
+          );
+          console.log('Set remote answer:', answer);
+        } else {
+          console.warn(
+            'Peer connection is not in the right state to set answer'
+          );
+        }
+      } catch (error) {
+        console.error('Error handling answer:', error);
       }
-    } catch (error) {
-      console.error('Error handling answer:', error);
-    }
-  }, []);
+    },
+    []
+  );
 
-  const handleCandidate = useCallback(async (candidate: RTCIceCandidateInit) => {
-    if (!peerConnectionRef.current) return;
+  const handleCandidate = useCallback(
+    async (candidate: RTCIceCandidateInit) => {
+      if (!peerConnectionRef.current) return;
 
-    try {
-      if (peerConnectionRef.current.remoteDescription) {
-        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log('Added ICE candidate:', candidate);
-      } else {
-        console.warn('Remote description not set before adding candidate');
+      try {
+        if (peerConnectionRef.current.remoteDescription) {
+          await peerConnectionRef.current.addIceCandidate(
+            new RTCIceCandidate(candidate)
+          );
+          console.log('Added ICE candidate:', candidate);
+        } else {
+          console.warn('Remote description not set before adding candidate');
+        }
+      } catch (error) {
+        console.error('Error adding ICE candidate:', error);
       }
-    } catch (error) {
-      console.error('Error adding ICE candidate:', error);
-    }
-  }, []);
+    },
+    []
+  );
 
   const startCall = useCallback(async () => {
     if (!peerConnectionRef.current) return;
-    if (peerConnectionRef.current.signalingState !== "stable") return;
+    if (peerConnectionRef.current.signalingState !== 'stable') return;
 
     try {
       const offer = await peerConnectionRef.current.createOffer();
@@ -204,10 +219,17 @@ export default function VideoCall() {
     }
   };
 
-
   return (
     <Fragment>
-      <Button variant='outlined' size='medium' onClick={() => { startCall() }}>start call</Button>
+      <Button
+        variant="outlined"
+        size="medium"
+        onClick={() => {
+          startCall();
+        }}
+      >
+        start call
+      </Button>
       {ChatBox && (
         <MessageBox
           messages={messages}

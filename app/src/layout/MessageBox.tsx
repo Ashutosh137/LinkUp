@@ -34,8 +34,8 @@ function MessageBox({
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setNewMessage(false)
-  }, [])
+    setNewMessage(false);
+  }, []);
 
   return (
     <Box
