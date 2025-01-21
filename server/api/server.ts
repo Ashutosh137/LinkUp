@@ -1,11 +1,11 @@
 require("dotenv").config();
 import { Socket } from "socket.io";
 import helmet from "helmet";
-import conn from "./database/database";
-import router from "./Routes/Route";
+import conn from "../database/database";
+import router from "../Routes/Route";
 import morgen from "morgan";
 import hpp from "hpp";
-import Createroom from "./utilities/create-room";
+import Createroom from "../utilities/create-room";
 const compression = require("compression");
 const express = require("express");
 const http = require("http");
